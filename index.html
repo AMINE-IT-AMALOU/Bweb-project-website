@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Top Movies</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: linear-gradient(to bottom, #000000, #2a5298);
+      --text-color: #705d5d;
+      --header-bg: #040507;
+      --card-bg: #ffffff;
+      --card-text: #1a1a1a;
+      --button-bg: #ffd700;
+      --button-hover: #ff9800;
+      --rating-color: #e67e22;
+      --footer-bg: #000000;
+    }
+
+    body.dark-theme {
+      --bg-main: linear-gradient(to bottom, #1e1e1e, #121212);
+      --text-color: #cccccc;
+      --header-bg: #121212;
+      --card-bg: #1f1f1f;
+      --card-text: #f0f0f0;
+      --button-bg: #444;
+      --button-hover: #666;
+      --rating-color: #f39c12;
+      --footer-bg: #121212;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Roboto", sans-serif;
+      background: var(--bg-main);
+      color: var(--text-color);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--button-bg);
+      color: black;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 10000;
+      transition: background 0.3s;
+    }
+
+    .theme-toggle:hover {
+      background: var(--button-hover);
+    }
+
+    .welcome-screen {
+      position: fixed;
+      z-index: 9999;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(270deg, #000428, #004e92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      animation: fadeOut 0.6s ease 2.5s forwards;
+    }
+
+    .welcome-text {
+      color: #ffd700;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      text-shadow: 0 0 10px #ff9800;
+      animation: fadeIn 1.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    .main-content {
+      opacity: 0;
+      animation: showMain 0.5s ease 2.6s forwards;
+    }
+
+    @keyframes showMain {
+      to { opacity: 1; }
+    }
+
+    header {
+      background-color: var(--header-bg);
+      color: #ffd700;
+      text-align: center;
+      padding: 20px 0;
+      font-size: 44px;
+      font-weight: bold;
+    }
+
+    input[type="radio"] {
+      display: none;
+    }
+
+    .genre-selector {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .genre-button {
+      background-color: var(--button-bg);
+      color: #000000;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .genre-button:hover {
+      background-color: var(--button-hover);
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      color: var(--card-text);
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+      width: 300px;
+      overflow: hidden;
+      transition: transform 0.4s ease, box-shadow 0.4s ease, background 0.3s, color 0.3s;
+      display: none;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-content h3 {
+      font-size: 1.25rem;
+      font-weight: bold;
+      text-shadow: 0 1px 1px rgba(255, 215, 0, 0.5);
+    }
+
+    .card-content p {
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .rating {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--rating-color);
+    }
+
+    .rating::before {
+      content: "🎞️ ";
+      margin-right: 4px;
+    }
+
+    footer {
+      background-color: var(--footer-bg);
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    footer a {
+      color: #ff9800;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .top-button-container {
+      background-color: #000;
+      padding: 20px 0;
+      text-align: center;
+    }
+
+    .top-button {
+      background-color: var(--button-bg);
+      color: #000000;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      display: inline-block;
+      transition: background-color 0.3s;
+    }
+
+    .top-button:hover {
+      background-color: var(--button-hover);
+    }
+
+    #all:checked ~ .main-content .container .card,
+    #action:checked ~ .main-content .container .card.action,
+    #sci-fi:checked ~ .main-content .container .card.sci-fi,
+    #drama:checked ~ .main-content .container .card.drama {
+      display: block;
+    }
+
+    #action:checked ~ .main-content .container .card:not(.action),
+    #sci-fi:checked ~ .main-content .container .card:not(.sci-fi),
+    #drama:checked ~ .main-content .container .card:not(.drama) {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="document.body.classList.toggle('dark-theme')">Toggle Theme</button>
+
+  <div class="welcome-screen">
+    <div class="welcome-text">Welcome to Movie Picks</div>
+  </div>
+
+  <input type="radio" name="genre" id="all" checked>
+  <input type="radio" name="genre" id="sci-fi">
+  <input type="radio" name="genre" id="action">
+  <input type="radio" name="genre" id="drama">
+
+  <div class="main-content">
+    <header>Top Movies</header>
+
+    <div class="genre-selector">
+      <label for="all" class="genre-button">All</label>
+      <label for="sci-fi" class="genre-button">Sci-Fi</label>
+      <label for="action" class="genre-button">Action</label>
+      <label for="drama" class="genre-button">Drama</label>
+    </div>
+
+    <div class="container">
+      <div class="card sci-fi action">
+        <a href="https://www.imdb.com/title/tt1375666/" target="_blank" style="text-decoration: none; color: inherit;">
+          <img src="https://m.media-amazon.com/images/I/81p+xe8cbnL._AC_SY679_.jpg" alt="Inception">
+          <div class="card-content">
+            <h3>Inception</h3>
+            <p>A mind-bending thriller about dreams within dreams, directed by Christopher Nolan.</p>
+            <p class="rating">Rating: 8.8/10</p>
+          </div>
+        </a>
+      </div>
+      <div class="card sci-fi drama">
+        <a href="https://www.imdb.com/title/tt0816692/" target="_blank" style="text-decoration: none; color: inherit;">
+          <img src="https://c4.wallpaperflare.com/wallpaper/775/852/888/adventure-film-futuristic-interstellar-wallpaper-preview.jpg" alt="Interstellar">
+          <div class="card-content">
+            <h3>Interstellar</h3>
+            <p>An epic journey through space and time to save humanity, directed by Christopher Nolan.</p>
+            <p class="rating">Rating: 8.7/10</p>
+          </div>
+        </a>
+      </div>
+      <div class="card action">
+        <a href="https://www.imdb.com/title/tt0468569/" target="_blank" style="text-decoration: none; color: inherit;">
+          <img src="https://m.media-amazon.com/images/M/MV5BMTM1NTcwMTk4OV5BMl5BanBnXkFtZTcwOTczMTk2Mw@@._V1_QL75_UX769.5_.jpg" alt="The Dark Knight">
+          <div class="card-content">
+            <h3>The Dark Knight</h3>
+            <p>A gritty and intense superhero film featuring Batman and the Joker, directed by Christopher Nolan.</p>
+            <p class="rating">Rating: 9.0/10</p>
+          </div>
+        </a>
+      </div>
+      <div class="card sci-fi action">
+        <a href="https://www.imdb.com/title/tt0133093/" target="_blank" style="text-decoration: none; color: inherit;">
+          <img src="https://m.media-amazon.com/images/I/51EG732BV3L._AC_SY679_.jpg" alt="The Matrix">
+          <div class="card-content">
+            <h3>The Matrix</h3>
+            <p>A groundbreaking sci-fi film about a dystopian future and the fight for freedom.</p>
+            <p class="rating">Rating: 8.7/10</p>
+          </div>
+        </a>
+      </div>
+      <div class="card drama">
+        <a href="https://www.imdb.com/title/tt0111161/" target="_blank" style="text-decoration: none; color: inherit;">
+          <img src="https://m.media-amazon.com/images/I/51NiGlapXlL._AC_SY679_.jpg" alt="The Shawshank Redemption">
+          <div class="card-content">
+            <h3>The Shawshank Redemption</h3>
+            <p>A story of hope and friendship set in a prison, where two inmates bond over the years.</p>
+            <p class="rating">Rating: 9.3/10</p>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <footer>
+      <p>Members Of Project:</p>
+      <p>
+        <a>Bencherif Abderraouf</a>
+        <a>Amalou Amine</a>
+        <a>Mohamed Amine Laribi</a>
+        <a>Grigahcene Anis Yacine</a>
+        <a>Zabila Abdelhadi</a>
+        <a>Djebiri Hamza Abdelhadi</a>
+      </p>
+    </footer>
+
+    <div class="top-button-container">
+      <a href="#top" class="top-button">Back to Top</a>
+    </div>
+  </div>
+</body>
+</html>
